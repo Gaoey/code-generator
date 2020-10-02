@@ -1,0 +1,9 @@
+package base
+
+func baseRequestToModel(req Request) models.Base {
+	result := models.Base{
+		Name: req.Name,
+	}
+
+	return result
+}

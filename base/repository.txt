@@ -1,0 +1,67 @@
+package base
+
+type Repositorier interface {
+	GetAll(offset, limit int, userId uuid.UUID) ([]models.Base, error)
+	GetById(id uuid.UUID) (*models.Base, error)
+	Add(base models.Base) error
+	Update(base models.Base) error
+	Remove(id string) error
+}
+
+type Repository struct {
+	db *gorm.DB
+}
+
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{db: db}
+}
+
+func (repo *Repository) GetAll(offset, limit int, userId uuid.UUID) ([]models.Base, error) {
+	var base []models.Base
+	err := repo.db.Table("").Offset(offset).Limit(limit).Where("is_deleted = ? and user_id = ?", 0, userId).Find(&base).Error
+	if err != nil {
+		return nil, err
+	}
+	return base, nil
+}
+
+func (repo *Repository) GetById(id uuid.UUID) (*models.Base, error) {
+	var base models.Base
+	err := repo.db.Table("").Where("id = ? and is_deleted = ?", id, 0).Find(&base).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &base, nil
+}
+
+func (repo *Repository) Add(base models.Base) error {
+	err := repo.db.Table("").Create(&base).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *Repository) Update(base models.Base) error {
+	err := repo.db.Table("").Save(&base).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *Repository) Remove(id string) error {
+	err := repo.db.Table("").
+		Where("id = ?", id).
+		Update("is_deleted", 1).
+		Update("deleted_at", time.Now()).
+		Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

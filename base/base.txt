@@ -1,0 +1,86 @@
+package base
+
+type Servicer interface {
+	GetAll(offset, limit int, userId uuid.UUID) ([]models.Base, error)
+	GetById(id string) (*models.Base, error)
+	Add(req AddRequest, userId uuid.UUID) (*AddResponse, error)
+	Update(id string, req UpdateRequest) error
+	Remove(id string) error
+}
+
+type Service struct {
+	Repository Repositorier
+}
+
+func NewService(db *gorm.DB) *Service {
+	return &Service{
+		Repository: NewRepository(db),
+	}
+}
+
+func (s *Service) GetAll(offset, limit int, userId uuid.UUID) ([]models.Base, error) {
+	bases, err := s.Repository.GetAll(offset, limit, userId)
+	if err != nil {
+		logrus.Errorf("cannot get all bases")
+		return nil, err
+	}
+
+	return bases, nil
+}
+
+func (s *Service) GetById(id string) (*models.Base, error) {
+	uuid := uuid.MustParse(id)
+	base, err := s.Repository.GetById(uuid)
+	if err != nil {
+		logrus.Errorf("cannot get base by id: %s, %s", id, err.Error())
+		return nil, err
+	}
+
+	return base, nil
+}
+
+// @TODO when create base should create default category
+func (s *Service) Add(req AddRequest, userId uuid.UUID) (*AddResponse, error) {
+	baseId := uuid.New()
+	base := baseRequestToModel(req.Request)
+	base.ID = baseId
+	base.UserID = userId
+
+	err := s.Repository.Add(base)
+	if err != nil {
+		logrus.Errorf("cannot create base, %s", err.Error())
+		return nil, err
+	}
+
+	response := AddResponse{ID: baseId.String()}
+	return &response, nil
+}
+
+func (s *Service) Update(id string, req UpdateRequest) error {
+	base, err := s.GetById(id)
+	if err != nil {
+		logrus.Errorf("cannot get base by id, %s", err.Error())
+		return err
+	}
+
+	update := baseRequestToModel(req.Request)
+	update.ID = base.ID
+	update.UserID = base.UserID
+	err = s.Repository.Update(update)
+	if err != nil {
+		logrus.Errorf("cannot update base by id, %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) Remove(id string) error {
+	err := s.Repository.Remove(id)
+	if err != nil {
+		logrus.Errorf("cannot remove base by id, %s", err.Error())
+		return err
+	}
+
+	return nil
+}
