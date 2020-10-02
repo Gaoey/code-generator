@@ -1,4 +1,4 @@
-package test
+package goldornament
 
 type Request struct {
 	Name string `json:"name"`

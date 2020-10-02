@@ -1,5 +1,5 @@
 package models
 
-type Test struct {
+type Base struct {
 	Name string `json:"name"`
 }

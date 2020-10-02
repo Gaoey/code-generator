@@ -19,6 +19,6 @@ for f in $(find ./$MODULE -name '*.txt'); do
   
   mv $OLD $NEW
   sed -i '' -e "s/base/${MODULE}/g" $NEW
-  sed -i '' -e "s/Base/${MODEL}/g" $NEW
+  sed -i '' -e "s/models.Base/models.${MODEL}/g" $NEW
   echo "----"
 done
