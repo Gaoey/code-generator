@@ -19,13 +19,13 @@ func NewRepository(db *gorm.DB) *Repository {
 func (repo *Repository) GetAll(offset, limit int, userId uuid.UUID) (*GetAlllResponse, error) {
 	var base []models.Base
 	var total int
-	findTotal := repo.db.Table({TableNameHere}).Offset(offset).Limit(limit).Select("count(*) as total").Where("is_deleted = ? and user_id = ?", false, userId)
+	findTotal := repo.db.Table({TableNameHere}).Select("count(*) as total").Where("is_deleted = ? and user_id = ?", false, userId)
 	err := findTotal.Find(&total).Error
 	if err != nil {
 		return nil, err
 	}
 
-	err = repo.db.Table({TableNameHere}).Offset(offset).Limit(limit).Where("is_deleted = ? and user_id = ?", 0, userId).Find(&base).Error
+	err = repo.db.Table({TableNameHere}).Offset(offset).Limit(limit).Where("is_deleted = ? and user_id = ?", false, userId).Find(&base).Error
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (repo *Repository) GetAll(offset, limit int, userId uuid.UUID) (*GetAlllRes
 
 func (repo *Repository) GetById(id uuid.UUID) (*models.Base, error) {
 	var base models.Base
-	err := repo.db.Table({TableNameHere}).Where("id = ? and is_deleted = ?", id, 0).Find(&base).Error
+	err := repo.db.Table({TableNameHere}).Where("id = ? and is_deleted = ?", id, false).Find(&base).Error
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (repo *Repository) Update(base models.Base) error {
 func (repo *Repository) Remove(id string) error {
 	err := repo.db.Table({TableNameHere}).
 		Where("id = ?", id).
-		Update("is_deleted", 1).
+		Update("is_deleted", true).
 		Update("deleted_at", time.Now()).
 		Error
 	if err != nil {
