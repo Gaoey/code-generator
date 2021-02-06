@@ -1,0 +1,6 @@
+!.gitignore
+!generate.sh
+!readme.md
+!base
+
+*/
