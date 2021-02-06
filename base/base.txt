@@ -1,7 +1,7 @@
 package base
 
 type Servicer interface {
-	GetAll(offset, limit int, userId uuid.UUID) ([]models.Base, error)
+	GetAll(offset, limit int, userId uuid.UUID) (*GetAlllResponse, error)
 	GetById(id string) (*models.Base, error)
 	Add(req AddRequest, userId uuid.UUID) (*AddResponse, error)
 	Update(id string, req UpdateRequest) error
@@ -18,14 +18,14 @@ func NewService(db *gorm.DB) *Service {
 	}
 }
 
-func (s *Service) GetAll(offset, limit int, userId uuid.UUID) ([]models.Base, error) {
-	bases, err := s.Repository.GetAll(offset, limit, userId)
+func (s *Service) GetAll(offset, limit int, userId uuid.UUID) (*GetAlllResponse, error) {
+	response, err := s.Repository.GetAll(offset, limit, userId)
 	if err != nil {
 		logrus.Errorf("cannot get all bases")
 		return nil, err
 	}
 
-	return bases, nil
+	return response, nil
 }
 
 func (s *Service) GetById(id string) (*models.Base, error) {

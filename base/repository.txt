@@ -1,7 +1,7 @@
 package base
 
 type Repositorier interface {
-	GetAll(offset, limit int, userId uuid.UUID) ([]models.Base, error)
+	GetAll(offset, limit int, userId uuid.UUID) (*GetAlllResponse, error)
 	GetById(id uuid.UUID) (*models.Base, error)
 	Add(base models.Base) error
 	Update(base models.Base) error
@@ -16,18 +16,33 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (repo *Repository) GetAll(offset, limit int, userId uuid.UUID) ([]models.Base, error) {
+func (repo *Repository) GetAll(offset, limit int, userId uuid.UUID) (*GetAlllResponse, error) {
 	var base []models.Base
-	err := repo.db.Table("").Offset(offset).Limit(limit).Where("is_deleted = ? and user_id = ?", 0, userId).Find(&base).Error
+	var total int
+	findTotal := repo.db.Table({TableNameHere}).Offset(offset).Limit(limit).Select("count(*) as total").Where("is_deleted = ? and user_id = ?", false, userId)
+	err := findTotal.Find(&total).Error
 	if err != nil {
 		return nil, err
 	}
-	return base, nil
+
+	err = repo.db.Table({TableNameHere}).Offset(offset).Limit(limit).Where("is_deleted = ? and user_id = ?", 0, userId).Find(&base).Error
+	if err != nil {
+		return nil, err
+	}
+
+	result := GetAllResponse{
+		Total:  total,
+		Offset: offset,
+		Limit:  limit,
+		Data:   base,
+	}
+
+	return result, nil
 }
 
 func (repo *Repository) GetById(id uuid.UUID) (*models.Base, error) {
 	var base models.Base
-	err := repo.db.Table("").Where("id = ? and is_deleted = ?", id, 0).Find(&base).Error
+	err := repo.db.Table({TableNameHere}).Where("id = ? and is_deleted = ?", id, 0).Find(&base).Error
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +51,7 @@ func (repo *Repository) GetById(id uuid.UUID) (*models.Base, error) {
 }
 
 func (repo *Repository) Add(base models.Base) error {
-	err := repo.db.Table("").Create(&base).Error
+	err := repo.db.Table({TableNameHere}).Create(&base).Error
 	if err != nil {
 		return err
 	}
@@ -45,7 +60,7 @@ func (repo *Repository) Add(base models.Base) error {
 }
 
 func (repo *Repository) Update(base models.Base) error {
-	err := repo.db.Table("").Save(&base).Error
+	err := repo.db.Table({TableNameHere}).Save(&base).Error
 	if err != nil {
 		return err
 	}
@@ -54,7 +69,7 @@ func (repo *Repository) Update(base models.Base) error {
 }
 
 func (repo *Repository) Remove(id string) error {
-	err := repo.db.Table("").
+	err := repo.db.Table({TableNameHere}).
 		Where("id = ?", id).
 		Update("is_deleted", 1).
 		Update("deleted_at", time.Now()).
