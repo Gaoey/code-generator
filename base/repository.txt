@@ -1,7 +1,7 @@
 package base
 
 type Repositorier interface {
-	GetAll(offset, limit int, userId uuid.UUID) (*GetAlllResponse, error)
+	GetAll(offset, limit int, userId uuid.UUID) (*GetAllResponse, error)
 	GetById(id uuid.UUID) (*models.Base, error)
 	Add(base models.Base) error
 	Update(base models.Base) error
@@ -16,7 +16,7 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (repo *Repository) GetAll(offset, limit int, userId uuid.UUID) (*GetAlllResponse, error) {
+func (repo *Repository) GetAll(offset, limit int, userId uuid.UUID) (*GetAllResponse, error) {
 	var base []models.Base
 	var total int
 	findTotal := repo.db.Table({TableNameHere}).Select("count(*) as total").Where("is_deleted = ? and user_id = ?", false, userId)
@@ -37,7 +37,7 @@ func (repo *Repository) GetAll(offset, limit int, userId uuid.UUID) (*GetAlllRes
 		Data:   base,
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 func (repo *Repository) GetById(id uuid.UUID) (*models.Base, error) {
