@@ -105,7 +105,7 @@ func (h *Handler) Update(c echo.Context) error {
 			models.NewBaseErrorResponse(http.StatusInternalServerError, errs.InternalServerError, err.Error()))
 	}
 
-	return c.JSON(http.StatusNoContent, models.NewBaseResponse(http.StatusOK, nil))
+	return c.JSON(http.StatusOK, models.NewBaseResponse(http.StatusOK, nil))
 }
 
 func (h *Handler) Remove(c echo.Context) error {

@@ -1,7 +1,0 @@
-package models
-
-type Base struct {
-	BaseModel
-	ID          uuid.UUID `gorm:"primary_key;type:uuid" json:"id"`
-	Name string `json:"name"`
-}

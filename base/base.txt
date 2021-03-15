@@ -66,6 +66,8 @@ func (s *Service) Update(id string, req UpdateRequest) error {
 	update := baseRequestToModel(req.Request)
 	update.ID = base.ID
 	update.UserID = base.UserID
+	update.BaseModel = base.BaseModel
+	
 	err = s.Repository.Update(update)
 	if err != nil {
 		logrus.Errorf("cannot update base by id, %s", err.Error())
