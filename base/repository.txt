@@ -60,7 +60,7 @@ func (repo *Repository) Add(base models.Base) error {
 }
 
 func (repo *Repository) Update(base models.Base) error {
-	err := repo.db.Table({TableNameHere}).Save(&base).Error
+	err := repo.db.Table({TableNameHere}).Updates(&base).Error
 	if err != nil {
 		return err
 	}
